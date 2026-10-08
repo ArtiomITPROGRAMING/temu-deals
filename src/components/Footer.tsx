@@ -84,7 +84,7 @@ export const Footer: React.FC = () => {
             </h4>
             <ul className="space-y-2 text-xs text-slate-500 font-medium">
               <li><a href="#" className="hover:text-orange-600 transition-colors">Как работает алгоритм</a></li>
-              <li><a href="#" className="hover:text-orange-600 transition-colors">API для магазинов</a></li>
+              <li><a href="https://temu-deals-backend.onrender.com/docs" target="_blank" rel="noopener noreferrer" className="hover:text-orange-600 transition-colors">FastAPI Swagger Docs (Render) ↗</a></li>
               <li><a href="#" className="hover:text-orange-600 transition-colors">Telegram-бот</a></li>
               <li><a href="#" className="hover:text-orange-600 transition-colors">Политика конфиденциальности</a></li>
               <li><a href="#" className="hover:text-orange-600 transition-colors">Поддержка</a></li>

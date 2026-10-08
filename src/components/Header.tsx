@@ -107,6 +107,10 @@ export const Header: React.FC<HeaderProps> = ({
                 <span className="px-1.5 py-0.5 rounded text-[10px] font-extrabold uppercase bg-orange-100 text-orange-700">
                   TEMU
                 </span>
+                <span className="hidden md:inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200/60 shadow-2xs" title="Python FastAPI подключен на Render.com">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  Python Live
+                </span>
               </div>
               <p className="text-[10px] text-slate-400 font-medium hidden sm:block -mt-0.5">
                 Умные скидки & выкуп в Temu

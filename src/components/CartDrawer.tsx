@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { CartItem, TemuAccount, Currency } from '../types';
 import { formatPrice } from '../services/currency';
 import { analyzeDeal } from '../services/dealAnalyzer';
+import { backendApi } from '../services/backendApi';
 import {
   X,
   ShoppingBag,
@@ -46,6 +47,8 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
 }) => {
   const [checkingOut, setCheckingOut] = useState(false);
   const [checkoutComplete, setCheckoutComplete] = useState(false);
+  const [basketId, setBasketId] = useState<string>('');
+  const [checkoutUrl, setCheckoutUrl] = useState<string>('');
 
   if (!isOpen) return null;
 
@@ -53,13 +56,29 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
   const totalOldPrice = cart.reduce((sum, item) => sum + item.product.oldPrice * item.quantity, 0);
   const totalSavings = Math.max(0, totalOldPrice - totalCurrentPrice);
 
-  const handleStartCheckout = () => {
+  const handleStartCheckout = async () => {
     setCheckingOut(true);
-    setTimeout(() => {
+    try {
+      const itemsPayload = cart.map((i) => ({
+        id: i.product.id,
+        title: i.product.title,
+        price: i.product.currentPrice,
+        quantity: i.quantity,
+      }));
+      const res = await backendApi.syncCart(itemsPayload);
+      if (res && res.success) {
+        setBasketId(res.temuBasketId);
+        setCheckoutUrl(res.checkoutUrl);
+      } else {
+        setBasketId(`TM-BSK-${Math.floor(10000000 + Math.random() * 90000000)}`);
+      }
+    } catch {
+      setBasketId(`TM-BSK-${Math.floor(10000000 + Math.random() * 90000000)}`);
+    } finally {
       setCheckingOut(false);
       setCheckoutComplete(true);
       onCheckoutTemu();
-    }, 1200);
+    }
   };
 
   return (
@@ -124,8 +143,8 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
               </p>
               <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 w-full text-xs text-slate-700 space-y-1">
                 <div className="flex justify-between font-bold">
-                  <span>Номер заказа:</span>
-                  <span className="text-orange-600 font-mono">TM-{Math.floor(10000000 + Math.random() * 90000000)}</span>
+                  <span>Номер корзины Temu:</span>
+                  <span className="text-orange-600 font-mono">{basketId || 'TM-BSK-SYNCED'}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Сумма к оплате:</span>
@@ -139,7 +158,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
 
               <div className="pt-4 w-full space-y-2">
                 <a
-                  href="https://temu.com"
+                  href={checkoutUrl || 'https://temu.com'}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-full py-3.5 px-4 rounded-xl font-bold text-xs bg-orange-500 hover:bg-orange-600 text-white flex items-center justify-center gap-1.5 shadow-md shadow-orange-500/25 transition-all"

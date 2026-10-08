@@ -9,6 +9,7 @@ import {
   AdaptiveEngineMetrics,
   AdaptiveLogEntry,
 } from '../types';
+import { backendApi } from './backendApi';
 
 export const SUPPORTED_REGIONS: Record<string, RegionalConfig> = {
   RU: {
@@ -283,7 +284,27 @@ class AdaptiveEngineService {
     const cleanUrl = rawUrl.trim();
     this.addLog('info', 'deep_resolver', `Обработка входящей ссылки: ${cleanUrl.slice(0, 40)}...`);
 
-    // 1. Extract Goods ID / SKU
+    // 1. Try Live Render Python Backend first
+    try {
+      const liveRes = await backendApi.resolveTemuLink(cleanUrl);
+      if (liveRes && liveRes.goodsId) {
+        this.addLog('success', 'direct_gateway', `Render API: товар #${liveRes.goodsId} успешно получен (${liveRes.discount} скидка)`);
+        return {
+          goodsId: liveRes.goodsId,
+          title: liveRes.title,
+          category: liveRes.category,
+          brand: liveRes.brand,
+          price: liveRes.flashPrice,
+          oldPrice: liveRes.retailPrice,
+          image: liveRes.imageUrl,
+          resolvedTier: 'direct_gateway',
+        };
+      }
+    } catch {
+      // fallback to client-side heuristics
+    }
+
+    // 2. Extract Goods ID / SKU
     const idMatch =
       cleanUrl.match(/goods_id=(\d+)/i) ||
       cleanUrl.match(/-g-(\d+)/i) ||
@@ -292,7 +313,7 @@ class AdaptiveEngineService {
 
     const goodsId = idMatch ? idMatch[1] : `TM-${Math.floor(100000000 + Math.random() * 900000000)}`;
 
-    // 2. Emulate Tier 1 -> Tier 2 -> Tier 3 resolution
+    // 3. Emulate Tier 1 -> Tier 2 -> Tier 3 resolution
     const antiTokens = this.generateAntiBotTokens();
     this.addLog('evasion', 'direct_gateway', `Инъекция токенов обхода Kasada: ${antiTokens.nanoFp.slice(0, 16)}...`);
 

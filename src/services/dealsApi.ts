@@ -1,5 +1,6 @@
 import { Product, PriceAlert, NotificationItem } from '../types';
 import { MOCK_PRODUCTS } from '../data/mockProducts';
+import { backendApi } from './backendApi';
 
 /**
  * DealFinder API Service Interface
@@ -64,8 +65,24 @@ class DealsApiService implements MarketplaceApiAdapter {
   private products: Product[] = [...MOCK_PRODUCTS];
 
   async fetchProducts(query?: string, category?: string): Promise<Product[]> {
-    // Simulated network delay
-    await new Promise((resolve) => setTimeout(resolve, 80));
+    try {
+      const live = await backendApi.fetchProducts(category);
+      if (live && live.length > 0) {
+        let result = live as Product[];
+        if (query && query.trim()) {
+          const q = query.toLowerCase().trim();
+          result = result.filter(
+            (p) =>
+              p.title.toLowerCase().includes(q) ||
+              p.brand.toLowerCase().includes(q) ||
+              p.category.toLowerCase().includes(q)
+          );
+        }
+        return result;
+      }
+    } catch {
+      // safe fallback to local mock
+    }
 
     let result = [...this.products];
     if (category && category !== 'all') {

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { TemuAccount, TemuOrder } from '../types';
+import { backendApi } from '../services/backendApi';
 import {
   X,
   ShieldCheck,
@@ -131,6 +132,13 @@ export const TemuAuthModal: React.FC<TemuAuthModalProps> = ({
       linkedAt: new Date().toISOString(),
       orders: mockOrders,
     };
+
+    // Sync with Live Python FastAPI Backend
+    try {
+      backendApi.authTemu(authType, contact, code).catch(() => {});
+    } catch {
+      // safe fallback
+    }
 
     onUpdateTemuAccount(updated);
     setLoading(false);
