@@ -135,7 +135,7 @@ export const TemuAuthModal: React.FC<TemuAuthModalProps> = ({
 
     // Sync with Live Python FastAPI Backend
     try {
-      backendApi.authTemu(authType, contact, code).catch(() => {});
+      backendApi.authTemu(authMethod, contact, code).catch(() => {});
     } catch {
       // safe fallback
     }
