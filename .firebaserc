@@ -1,0 +1,14 @@
+{
+  "projects": {
+    "default": "omnistack-b8815"
+  },
+  "targets": {
+    "omnistack-b8815": {
+      "hosting": {
+        "dealfinder": [
+          "dealfinder-deals"
+        ]
+      }
+    }
+  }
+}
