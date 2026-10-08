@@ -188,11 +188,11 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 <p className="text-xs sm:text-sm text-slate-300 mt-1 max-w-2xl leading-relaxed">
                   {temuAccount.isConnected
                     ? `Адрес доставки: ${
-                        temuAccount.shippingAddress
-                          ? `${temuAccount.shippingAddress.city}, ${temuAccount.shippingAddress.street}`
-                          : 'Россия, Москва'
-                      } • Заказов в пути: ${temuAccount.orders.length} шт. Товары добавляются напрямую в корзину Temu.`
-                    : 'Получите сквозной выкуп товаров прямо в корзину Temu, автоматическое заполнение адреса и приветственные купоны на 2 000 ₽!'}
+                        temuAccount.shippingAddress?.fullName
+                          ? `${temuAccount.shippingAddress.city ? temuAccount.shippingAddress.city + ', ' : ''}${temuAccount.shippingAddress.street}`
+                          : 'не указан (нажмите для добавления)'
+                      } • Заказов: ${temuAccount.orders.length} шт. Экспорт товаров прямо в корзину Temu активен.`
+                    : 'Сквозной экспорт товаров со скидками до 95% прямо в корзину Temu и быстрое оформление покупок.'}
                 </p>
               </div>
             </div>
