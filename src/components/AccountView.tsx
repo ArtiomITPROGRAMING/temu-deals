@@ -71,21 +71,23 @@ export const AccountView: React.FC<AccountViewProps> = ({
       <div className="bg-white rounded-3xl border border-slate-100 p-6 sm:p-8 shadow-xs mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
         <div className="flex items-center gap-4">
           <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-3xl bg-gradient-to-tr from-orange-500 to-amber-500 text-white font-black text-2xl sm:text-3xl flex items-center justify-center shadow-lg shadow-orange-500/25">
-            {temuAccount?.isConnected ? temuAccount.name.slice(0, 2).toUpperCase() : 'АВ'}
+            {temuAccount?.isConnected && temuAccount.name ? temuAccount.name.slice(0, 2).toUpperCase() : '👤'}
           </div>
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-xl sm:text-2xl font-black text-slate-900">
-                {temuAccount?.isConnected ? temuAccount.name : 'Александр Васильев'}
+                {temuAccount?.isConnected && temuAccount.name ? temuAccount.name : 'Гостевой аккаунт'}
               </h1>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800">
-                {temuAccount?.isConnected ? 'Temu VIP' : 'PRO Аккаунт'}
+              <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
+                temuAccount?.isConnected ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-600'
+              }`}>
+                {temuAccount?.isConnected ? 'Temu Активен' : 'Не авторизован'}
               </span>
             </div>
             <p className="text-xs text-slate-500 mt-0.5">
               {temuAccount?.isConnected
                 ? `${temuAccount.emailOrPhone} • Синхронизирован с Temu`
-                : 'alex.vasiliev@dealfinder.ru • Telegram: @alex_deal'}
+                : 'Войдите в аккаунт Temu для сохранения заказов и адреса'}
             </p>
           </div>
         </div>
@@ -95,7 +97,7 @@ export const AccountView: React.FC<AccountViewProps> = ({
           <div className="p-4 rounded-2xl bg-orange-50/70 border border-orange-200/80 text-center">
             <span className="text-[11px] text-orange-700 font-semibold block">Сэкономлено в Temu</span>
             <span className="text-xl sm:text-2xl font-black text-orange-600 mt-0.5 block">
-              {formatPrice(34850, currency)}
+              {formatPrice(temuAccount?.orders?.reduce((sum, o) => sum + (o.totalPrice * 0.35), 0) || 0, currency)}
             </span>
           </div>
           <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-center">
@@ -304,19 +306,19 @@ export const AccountView: React.FC<AccountViewProps> = ({
           {/* Tab 1: Profile & Stats */}
           {activeTab === 'profile' && (
             <div className="bg-white rounded-3xl border border-slate-100 p-6 sm:p-8 shadow-xs space-y-6">
-              <h2 className="text-lg font-bold text-slate-900">Ваша статистика экономии</h2>
+              <h2 className="text-lg font-bold text-slate-900">Ваша статистика</h2>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100">
-                  <span className="text-xs text-slate-500">Успешных покупок по акциям</span>
-                  <div className="text-2xl font-black text-slate-900 mt-1">14</div>
+                  <span className="text-xs text-slate-500">Заказов через Temu</span>
+                  <div className="text-2xl font-black text-slate-900 mt-1">{temuOrdersCount}</div>
                 </div>
                 <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100">
-                  <span className="text-xs text-slate-500">Средняя реальная скидка</span>
-                  <div className="text-2xl font-black text-emerald-600 mt-1">-38%</div>
+                  <span className="text-xs text-slate-500">Отслеживаемых товаров</span>
+                  <div className="text-2xl font-black text-emerald-600 mt-1">{alerts.length}</div>
                 </div>
                 <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100">
-                  <span className="text-xs text-slate-500">Дней с DealFinder</span>
-                  <div className="text-2xl font-black text-orange-600 mt-1">112</div>
+                  <span className="text-xs text-slate-500">В избранном</span>
+                  <div className="text-2xl font-black text-orange-600 mt-1">{favoriteProducts.length}</div>
                 </div>
               </div>
 
@@ -325,7 +327,7 @@ export const AccountView: React.FC<AccountViewProps> = ({
                 <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
                 <div className="text-xs text-emerald-900">
                   <span className="font-bold block">Алгоритм DealFinder активен 24/7</span>
-                  Ваши отслеживаемые товары сканируются каждые 15 минут в Temu и других крупнейших интернет-магазинах.
+                  Цены и остатки на складах Temu анализируются в реальном времени с подтверждением 90-дневной истории.
                 </div>
               </div>
             </div>

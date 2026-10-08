@@ -30,6 +30,7 @@ import { AdaptiveEngineModal } from './components/AdaptiveEngineModal';
 import { BottomNav } from './components/BottomNav';
 import { trackEvent } from './services/firebase';
 import { formatPrice } from './services/currency';
+import { backendApi } from './services/backendApi';
 import { Check } from 'lucide-react';
 
 export const App: React.FC = () => {
@@ -67,16 +68,7 @@ export const App: React.FC = () => {
     try {
       const saved = localStorage.getItem('dealfinder_cart');
       if (saved) return JSON.parse(saved);
-      // Default demo item in cart from Temu
-      const firstTemu = MOCK_PRODUCTS.find((p) => p.store === 'Temu') || MOCK_PRODUCTS[0];
-      return [
-        {
-          id: 'cart-init-1',
-          product: firstTemu,
-          quantity: 1,
-          addedAt: new Date().toISOString(),
-        },
-      ];
+      return [];
     } catch {
       return [];
     }
@@ -86,65 +78,54 @@ export const App: React.FC = () => {
   const [temuAccount, setTemuAccount] = useState<TemuAccount>(() => {
     try {
       const saved = localStorage.getItem('dealfinder_temu_account');
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.emailOrPhone === '+7 (926) 482-19-02' || parsed.name === 'Александр Васильев') {
+          localStorage.removeItem('dealfinder_temu_account');
+          return {
+            isConnected: false,
+            emailOrPhone: '',
+            name: '',
+            avatar: '',
+            orders: [],
+          };
+        }
+        return parsed;
+      }
       return {
-        isConnected: true,
-        emailOrPhone: '+7 (926) 482-19-02',
-        name: 'Александр В.',
-        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200',
-        shippingAddress: {
-          fullName: 'Александр Васильев',
-          phone: '+7 (926) 482-19-02',
-          country: 'Россия',
-          city: 'Москва',
-          street: 'ул. Тверская, д. 12, кв. 45',
-          postalCode: '125009',
-        },
-        linkedAt: '2026-10-06T12:00:00Z',
-        orders: [
-          {
-            id: 'ord-101',
-            temuOrderId: 'TM-94819204',
-            items: [],
-            totalPrice: 1998,
-            currency: 'RUB',
-            status: 'shipped',
-            statusLabel: 'В пути (Авиаперевозка из Китая)',
-            trackingNumber: 'LP00694829104CN',
-            estimatedDelivery: '14-18 октября',
-            createdAt: '2026-10-06T15:20:00Z',
-          },
-          {
-            id: 'ord-102',
-            temuOrderId: 'TM-83719284',
-            items: [],
-            totalPrice: 3450,
-            currency: 'RUB',
-            status: 'delivered',
-            statusLabel: 'Доставлен в пункт выдачи CDEK',
-            trackingNumber: 'LP00583719284CN',
-            estimatedDelivery: '28 сентября',
-            createdAt: '2026-09-22T10:10:00Z',
-          },
-        ],
+        isConnected: false,
+        emailOrPhone: '',
+        name: '',
+        avatar: '',
+        orders: [],
       };
     } catch {
       return {
         isConnected: false,
         emailOrPhone: '',
         name: '',
+        avatar: '',
         orders: [],
       };
     }
   });
 
+  // Fetch live catalog from Render Python backend on load
+  useEffect(() => {
+    backendApi.fetchProducts().then((live) => {
+      if (live && live.length > 0) {
+        setProducts(live as Product[]);
+      }
+    }).catch(() => {});
+  }, []);
+
   // User Favorites with LocalStorage
   const [favorites, setFavorites] = useState<string[]>(() => {
     try {
       const saved = localStorage.getItem('dealfinder_favs');
-      return saved ? JSON.parse(saved) : ['p-1', 'p-2', 'p-3'];
+      return saved ? JSON.parse(saved) : [];
     } catch {
-      return ['p-1', 'p-2', 'p-3'];
+      return [];
     }
   });
 
@@ -152,34 +133,13 @@ export const App: React.FC = () => {
   const [alerts, setAlerts] = useState<PriceAlert[]>(() => {
     try {
       const saved = localStorage.getItem('dealfinder_alerts');
-      return saved
-        ? JSON.parse(saved)
-        : [
-            {
-              id: 'alt-1',
-              productId: 'p-1',
-              productTitle: 'Беспроводные наушники Pro 4 TWS',
-              productImage: 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=800',
-              targetPrice: 900,
-              currentPrice: 999,
-              contactMethod: 'telegram',
-              contactValue: '@alex_deal',
-              createdAt: '2026-10-06T12:00:00Z',
-              isActive: true,
-            },
-            {
-              id: 'alt-2',
-              productId: 'p-2',
-              productTitle: 'Видеокарта Palit GeForce RTX 3060 Dual 12GB',
-              productImage: 'https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=800',
-              targetPrice: 24000,
-              currentPrice: 24990,
-              contactMethod: 'telegram',
-              contactValue: '@alex_deal',
-              createdAt: '2026-10-07T14:30:00Z',
-              isActive: true,
-            },
-          ];
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          return parsed.filter((a: any) => a.contactValue !== '@alex_deal');
+        }
+      }
+      return [];
     } catch {
       return [];
     }
@@ -188,9 +148,9 @@ export const App: React.FC = () => {
   const [viewHistory, setViewHistory] = useState<string[]>(() => {
     try {
       const saved = localStorage.getItem('dealfinder_history');
-      return saved ? JSON.parse(saved) : ['p-1', 'p-2', 'p-4', 'p-7'];
+      return saved ? JSON.parse(saved) : [];
     } catch {
-      return ['p-1', 'p-2', 'p-4', 'p-7'];
+      return [];
     }
   });
 

@@ -64,7 +64,7 @@ async function testBackend() {
           { productId: 'p-temu-cheap-1', quantity: 2, price: 29.0 },
           { productId: 'p-temu-cheap-2', quantity: 1, price: 39.0 },
         ],
-        accountPhoneOrEmail: '+7 (926) 482-19-02',
+        accountPhoneOrEmail: 'test_user@gmail.com',
       }),
     });
     const syncData = await syncRes.json();

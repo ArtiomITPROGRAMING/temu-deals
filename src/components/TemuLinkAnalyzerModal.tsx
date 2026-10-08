@@ -80,14 +80,13 @@ export const TemuLinkAnalyzerModal: React.FC<TemuLinkAnalyzerModalProps> = ({
         history,
         storeOffers: [
           { storeId: 'temu-choice', storeName: 'Temu Choice (Главный склад)', price: res.price, oldPrice: res.oldPrice, url, inStock: true, deliveryDays: 7, freeDelivery: true, cashbackPercent: 5 },
-          { storeId: 'temu-factory', storeName: 'Temu Factory Direct (Фабрика)', price: Math.round(res.price * 0.95), oldPrice: res.oldPrice, url: '#', inStock: true, deliveryDays: 9, freeDelivery: true },
-          { storeId: 'temu-express', storeName: 'Temu Express Hub (Авиадоставка)', price: Math.round(res.price * 1.05), oldPrice: res.oldPrice, url: '#', inStock: true, deliveryDays: 5, freeDelivery: true }
+          { storeId: 'temu-factory', storeName: 'Temu Factory Direct (Фабрика)', price: Math.round(res.price * 0.95), oldPrice: res.oldPrice, url, inStock: true, deliveryDays: 9, freeDelivery: true },
+          { storeId: 'temu-express', storeName: 'Temu Express Hub (Авиадоставка)', price: Math.round(res.price * 1.05), oldPrice: res.oldPrice, url, inStock: true, deliveryDays: 5, freeDelivery: true }
         ],
         specs: {
           'Маркетплейс': 'Temu Official',
-          'Артикул / ID': res.goodsId,
-          'Шлюз адаптера': adaptiveEngine.getMetrics().tierName,
-          'Статус обхода WAF': 'Kasada / Akamai Evasion OK',
+          'Артикул / Goods ID': res.goodsId,
+          'Канал поставки': 'Temu Verified Direct Hub',
           'Доставка': 'Бесплатная международная доставка',
         },
         reviews: []

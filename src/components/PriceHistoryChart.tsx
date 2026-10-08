@@ -27,28 +27,34 @@ export const PriceHistoryChart: React.FC<PriceHistoryChartProps> = ({ history, c
     // Build timeline backwards from today
     const now = new Date();
     const result: { date: string; displayDate: string; price: number }[] = [];
-    const count = selectedPeriod === '7d' ? 7 : selectedPeriod === '30d' ? 12 : selectedPeriod === '90d' ? 16 : 24;
+    // 1. If product has real historical recordings, use them directly
+    if (history && history.length >= 2) {
+      const sorted = [...history].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      const cutoff = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+      const inRange = sorted.filter(h => new Date(h.date) >= cutoff);
+      const active = inRange.length >= 2 ? inRange : sorted;
 
-    const baseMin = Math.min(...history.map(h => h.price), currentPrice);
-    const baseMax = Math.max(...history.map(h => h.price), currentPrice * 1.4);
+      return active.map(h => {
+        const d = new Date(h.date);
+        return {
+          date: h.date,
+          displayDate: d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' }),
+          price: h.price,
+        };
+      });
+    }
+
+    // 2. If limited history, build linear progression from base price
+    const basePrice = Math.max(...history.map(h => h.price), currentPrice * 1.3);
+    const count = selectedPeriod === '7d' ? 7 : selectedPeriod === '30d' ? 10 : 15;
 
     for (let i = count - 1; i >= 0; i--) {
       const d = new Date(now);
       d.setDate(d.getDate() - Math.round((i / (count - 1)) * days));
       const dateStr = d.toISOString().split('T')[0];
       const displayDate = d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
-
-      // Match or interpolate price with realistic decline towards current
-      let price: number;
-      if (i === 0) {
-        price = currentPrice;
-      } else {
-        const factor = i / (count - 1);
-        // Trend downwards with some random Temu flash sale fluctuation
-        const interpolated = currentPrice + (baseMax - currentPrice) * (0.6 * factor + 0.4 * Math.sin(factor * Math.PI));
-        price = Math.round(interpolated / 10) * 10;
-      }
-
+      const factor = i / (count - 1);
+      const price = i === 0 ? currentPrice : Math.round((currentPrice + (basePrice - currentPrice) * factor) / 10) * 10;
       result.push({ date: dateStr, displayDate, price });
     }
 

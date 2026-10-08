@@ -47,12 +47,12 @@ export const TemuAuthModal: React.FC<TemuAuthModalProps> = ({
   const [isEditingAddress, setIsEditingAddress] = useState(false);
   const [addressDraft, setAddressDraft] = useState(
     temuAccount.shippingAddress || {
-      fullName: 'Александр Васильев',
-      phone: '+7 (926) 482-19-02',
+      fullName: '',
+      phone: '',
       country: 'Россия',
-      city: 'Москва',
-      street: 'ул. Тверская, д. 12, кв. 45',
-      postalCode: '125009',
+      city: '',
+      street: '',
+      postalCode: '',
     }
   );
 
@@ -65,17 +65,17 @@ export const TemuAuthModal: React.FC<TemuAuthModalProps> = ({
     setTimeout(() => {
       setLoading(false);
       setStep('code');
-      onShowToast(`Код верификации Temu отправлен на ${inputVal}`);
+      onShowToast(`Код верификации Temu отправлен на ${inputVal.trim()}`);
     }, 700);
   };
 
   const handleVerifyCode = (e: React.FormEvent) => {
     e.preventDefault();
-    if (code.length < 4) return;
+    if (code.length < 4 || !inputVal.trim()) return;
     setLoading(true);
 
     setTimeout(() => {
-      completeConnection(inputVal || '+7 (926) 482-19-02');
+      completeConnection(inputVal.trim());
     }, 900);
   };
 
@@ -83,7 +83,7 @@ export const TemuAuthModal: React.FC<TemuAuthModalProps> = ({
     setLoading(true);
     setQrScanned(true);
     setTimeout(() => {
-      completeConnection('temu_app_qr_user@temu.com');
+      completeConnection('temu_app_user@temu.com');
     }, 1200);
   };
 
@@ -91,46 +91,23 @@ export const TemuAuthModal: React.FC<TemuAuthModalProps> = ({
     e.preventDefault();
     setLoading(true);
     setTimeout(() => {
-      completeConnection('api_token_session@temu.com');
+      completeConnection(inputVal.trim() || 'temu_user_token@temu.com');
     }, 800);
   };
 
   const completeConnection = (contact: string) => {
-    const mockOrders: TemuOrder[] = [
-      {
-        id: 'ord-101',
-        temuOrderId: 'TM-94819204',
-        items: [],
-        totalPrice: 1998,
-        currency: 'RUB',
-        status: 'shipped',
-        statusLabel: 'В пути (Авиаперевозка Гуанчжоу → Москва)',
-        trackingNumber: 'LP00694829104CN',
-        estimatedDelivery: '14-18 октября',
-        createdAt: '2026-10-06T15:20:00Z',
-      },
-      {
-        id: 'ord-102',
-        temuOrderId: 'TM-83719284',
-        items: [],
-        totalPrice: 3450,
-        currency: 'RUB',
-        status: 'delivered',
-        statusLabel: 'Доставлен в пункт выдачи CDEK',
-        trackingNumber: 'LP00583719284CN',
-        estimatedDelivery: '28 сентября',
-        createdAt: '2026-09-22T10:10:00Z',
-      },
-    ];
+    const userDisplayName = contact.includes('@')
+      ? contact.split('@')[0]
+      : (contact.startsWith('+') ? `Пользователь (${contact.slice(-4)})` : contact);
 
     const updated: TemuAccount = {
       isConnected: true,
       emailOrPhone: contact,
-      name: contact.includes('@') ? contact.split('@')[0] : 'Александр В.',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200',
-      shippingAddress: addressDraft,
+      name: userDisplayName,
+      avatar: temuAccount.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200',
+      shippingAddress: addressDraft.fullName ? addressDraft : undefined,
       linkedAt: new Date().toISOString(),
-      orders: mockOrders,
+      orders: temuAccount.orders || [],
     };
 
     // Sync with Live Python FastAPI Backend

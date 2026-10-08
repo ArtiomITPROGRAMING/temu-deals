@@ -1,5 +1,6 @@
 import os
 import time
+import urllib.parse
 from typing import List, Optional
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
@@ -248,13 +249,21 @@ def health_check():
     }
 
 
+def with_direct_temu_url(p: Product) -> Product:
+    direct_url = f"https://www.temu.com/search_result.html?search_key={urllib.parse.quote(p.title)}"
+    if hasattr(p, "model_copy"):
+        return p.model_copy(update={"storeUrl": direct_url})
+    return p.copy(update={"storeUrl": direct_url})
+
+
 @app.get("/api/products", response_model=List[Product])
 def get_products(
     max_price: Optional[float] = None,
     category: Optional[str] = None,
     is_temu: Optional[bool] = None,
 ):
-    results = PRODUCTS_DB
+    results = [with_direct_temu_url(p) for p in PRODUCTS_DB]
+
     if max_price is not None:
         results = [p for p in results if p.currentPrice <= max_price]
     if category is not None and category != "all":
@@ -268,7 +277,7 @@ def get_products(
 def get_product_by_id(product_id: str):
     for p in PRODUCTS_DB:
         if p.id == product_id:
-            return p
+            return with_direct_temu_url(p)
     raise HTTPException(status_code=404, detail="Product not found")
 
 
@@ -284,52 +293,31 @@ async def resolve_temu_link_endpoint(req: TemuLinkRequest):
 
 @app.post("/api/temu/auth", response_model=TemuAccountResponse)
 def temu_auth_endpoint(req: TemuAuthRequest):
-    # Симуляция защищенной авторизации Temu
-    name = "Александр В."
-    if "@" in req.credential:
-        name = req.credential.split("@")[0].capitalize()
+    credential = req.credential.strip()
+    if "@" in credential:
+        name = credential.split("@")[0]
+    elif any(c.isdigit() for c in credential):
+        digits = "".join(filter(str.isdigit, credential))
+        name = f"Пользователь ({digits[-4:] if len(digits) >= 4 else digits})"
+    else:
+        name = credential
 
     address = TemuAddressModel(
-        fullName="Александр Васильев",
-        phone=req.credential,
+        fullName=name,
+        phone=credential if "@" not in credential else "",
         country="Россия",
-        city="Москва",
-        street="ул. Тверская, д. 12, кв. 45",
-        postalCode="125009",
+        city="",
+        street="",
+        postalCode="",
     )
-
-    orders = [
-        TemuOrderModel(
-            id="ord-101",
-            temuOrderId="TM-94819204",
-            itemsCount=2,
-            totalPrice=1998.0,
-            status="shipped",
-            statusLabel="В пути (Авиаперевозка из Китая)",
-            trackingNumber="LP00694829104CN",
-            estimatedDelivery="14-18 октября",
-            createdAt="2026-10-06T15:20:00Z",
-        ),
-        TemuOrderModel(
-            id="ord-102",
-            temuOrderId="TM-83719284",
-            itemsCount=3,
-            totalPrice=3450.0,
-            status="delivered",
-            statusLabel="Доставлен в пункт выдачи CDEK",
-            trackingNumber="LP00583719284CN",
-            estimatedDelivery="28 сентября",
-            createdAt="2026-09-22T10:10:00Z",
-        ),
-    ]
 
     return TemuAccountResponse(
         isConnected=True,
-        emailOrPhone=req.credential,
+        emailOrPhone=credential,
         name=name,
         avatar="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200",
         shippingAddress=address,
-        orders=orders,
+        orders=[],
         token=f"tm_session_token_{int(time.time())}",
     )
 
@@ -345,6 +333,6 @@ def sync_cart_endpoint(req: SyncCartRequest):
         temuBasketId=basket_id,
         totalAmount=total,
         freeShipping=True,
-        checkoutUrl=f"https://temu.com/checkout.html?basket_id={basket_id}",
+        checkoutUrl=f"https://www.temu.com/cart.html?basket_id={basket_id}",
         message=f"Успешно синхронизировано {len(req.items)} товаров на сумму {total} ₽ с корзиной Temu.",
     )

@@ -19,7 +19,7 @@ export const PriceAlertModal: React.FC<PriceAlertModalProps> = ({
     Math.round(product.currentPrice * 0.9 / 50) * 50
   );
   const [contactMethod, setContactMethod] = useState<'email' | 'telegram' | 'push'>('telegram');
-  const [contactValue, setContactValue] = useState<string>('@alex_deal');
+  const [contactValue, setContactValue] = useState<string>('');
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
 
   if (!isOpen) return null;

@@ -1,6 +1,6 @@
 import { Product } from '../types';
 
-export const MOCK_PRODUCTS: Product[] = [
+const RAW_PRODUCTS: Product[] = [
   {
     id: 'p-1',
     title: 'Беспроводные наушники Pro 4 TWS Bluetooth 5.3 с кейсом',
@@ -1039,6 +1039,18 @@ export const MOCK_PRODUCTS: Product[] = [
     reviews: []
   }
 ];
+
+export const MOCK_PRODUCTS: Product[] = RAW_PRODUCTS.map((p) => {
+  const directUrl = `https://www.temu.com/search_result.html?search_key=${encodeURIComponent(p.title)}`;
+  return {
+    ...p,
+    storeUrl: directUrl,
+    storeOffers: (p.storeOffers || []).map((o) => ({
+      ...o,
+      url: directUrl,
+    })),
+  };
+});
 
 export const CATEGORIES_LIST = [
   { id: 'all', name: 'Все категории', icon: 'Grid', count: '14 250+' },

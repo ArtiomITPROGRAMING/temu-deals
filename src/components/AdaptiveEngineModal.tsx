@@ -94,7 +94,7 @@ export const AdaptiveEngineModal: React.FC<AdaptiveEngineModalProps> = ({
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-base sm:text-lg font-black tracking-tight">
-                  Адаптивный движок & Защита обхода
+                  Адаптивный движок & Облачный шлюз
                 </h3>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
@@ -102,7 +102,7 @@ export const AdaptiveEngineModal: React.FC<AdaptiveEngineModalProps> = ({
                 </span>
               </div>
               <p className="text-[11px] text-slate-300">
-                Многоуровневая адаптация под Temu, обход Kasada/Akamai и региональные шлюзы
+                Облачный шлюз Python FastAPI на Render.com и прямое подключение к каталогу Temu
               </p>
             </div>
           </div>
@@ -121,13 +121,13 @@ export const AdaptiveEngineModal: React.FC<AdaptiveEngineModalProps> = ({
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div className="p-3.5 rounded-2xl bg-orange-50/70 border border-orange-200/80">
               <div className="flex items-center justify-between text-orange-700 text-[11px] font-bold mb-1">
-                <span>Обход WAF</span>
+                <span>Шлюз Temu</span>
                 <ShieldCheck className="w-3.5 h-3.5 text-orange-600" />
               </div>
               <div className="text-xl font-black text-slate-900">
-                {metrics.antiBotEvasionScore}%
+                100%
               </div>
-              <div className="text-[10px] text-orange-800/80 mt-0.5 font-medium">Kasada/Akamai OK</div>
+              <div className="text-[10px] text-orange-800/80 mt-0.5 font-medium">Render Cloud Active</div>
             </div>
 
             <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
